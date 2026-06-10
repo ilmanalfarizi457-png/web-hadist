@@ -29,6 +29,7 @@ export default function HadistList() {
   const [selKat, setSelKat]   = useState(sp.get('kategori')?.split(',').filter(Boolean) || []);
   const [selKitab, setSelKb]  = useState(sp.get('kitab') || '');
   const [page, setPage]       = useState(Number(sp.get('page')) || 1);
+  const [showFilter, setShowFilter] = useState(false);
   const dq = useDebounce(search);
 
   useEffect(() => {
@@ -79,7 +80,7 @@ export default function HadistList() {
   const totalPages = meta.last_page || 1;
 
   return (
-    <div style={{ maxWidth: 'var(--max-w)', margin: '0 auto', padding: 'calc(var(--nav-h) + 32px) 24px 64px' }}>
+    <div style={{ maxWidth: 'var(--max-w)', margin: '0 auto', padding: 'calc(var(--nav-h) + 32px) 16px 64px', overflowX: 'hidden' }}>
       <div style={{ marginBottom: 32 }}>
         <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '2rem', marginBottom: 6 }}>Koleksi Hadist</h1>
         <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
@@ -96,7 +97,7 @@ export default function HadistList() {
           value={search}
           onChange={e => { setSearch(e.target.value); setPage(1); }}
           placeholder="Cari hadist, terjemahan, atau kata kunci..."
-          style={{ width: '100%', padding: '12px 16px 12px 42px', borderRadius: 'var(--radius)', border: '1.5px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text-primary)', fontSize: '0.95rem', outline: 'none', fontFamily: 'var(--font-sans)', transition: 'border-color 0.2s' }}
+          style={{ width: '100%', padding: '12px 16px 12px 42px', borderRadius: 'var(--radius)', border: '1.5px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text-primary)', fontSize: '0.95rem', outline: 'none', fontFamily: 'var(--font-sans)', transition: 'border-color 0.2s', boxSizing: 'border-box' }}
           onFocus={e => e.target.style.borderColor = 'var(--accent)'}
           onBlur={e  => e.target.style.borderColor = 'var(--border)'}
         />
@@ -108,9 +109,27 @@ export default function HadistList() {
         )}
       </div>
 
+      {/* Tombol filter - hanya muncul di mobile */}
+      <button
+        className="filter-toggle-btn"
+        onClick={() => setShowFilter(p => !p)}
+        style={{
+          display: 'none', width: '100%', padding: '10px 16px',
+          marginBottom: 14, borderRadius: 'var(--radius)',
+          border: '1.5px solid var(--border)', background: 'var(--bg-card)',
+          color: 'var(--text-primary)', fontFamily: 'var(--font-sans)',
+          fontSize: '0.9rem', fontWeight: 600, cursor: 'pointer',
+          alignItems: 'center', justifyContent: 'space-between',
+          boxSizing: 'border-box',
+        }}
+      >
+        <span>🗂 Filter & Kategori</span>
+        <span>{showFilter ? '▲' : '▼'}</span>
+      </button>
+
       {/* Grid: sidebar + main */}
       <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,220px) minmax(0,1fr)', gap: 28 }} className="hadist-grid">
-        <aside>
+        <aside className={`hadist-aside${showFilter ? ' aside-open' : ''}`}>
           <SideSection title="Kitab">
             <button onClick={() => { setSelKb(''); setPage(1); }} className="btn-float-sm" style={filterBtn(!selKitab)}>Semua Kitab</button>
             {kitabList.map(k => (
@@ -157,7 +176,24 @@ export default function HadistList() {
       </div>
 
       <Footer />
-      <style>{`@media (max-width:640px) { .hadist-grid { grid-template-columns: 1fr !important; } }`}</style>
+
+      <style>{`
+        @media (max-width: 640px) {
+          .hadist-grid {
+            grid-template-columns: 1fr !important;
+          }
+          .filter-toggle-btn {
+            display: flex !important;
+          }
+          .hadist-aside {
+            display: none;
+          }
+          .hadist-aside.aside-open {
+            display: block;
+            margin-bottom: 16px;
+          }
+        }
+      `}</style>
     </div>
   );
 }
